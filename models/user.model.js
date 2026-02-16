@@ -23,12 +23,17 @@ const userSchema = new mongoose.Schema(
       enum: ["Admin", "Sales", "Service"],
       required: true,
     },
-    profileImage: {
+    image: {
       type: String,
       default: null,
     },
+    status: {
+      type: String,
+      enum: ["Active", "Inactive"],
+      default: "Active",
+    },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 module.exports = mongoose.model("User", userSchema);

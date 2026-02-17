@@ -4,11 +4,11 @@ const bcrypt = require("bcryptjs");
 // ✅ CREATE STAFF
 const createUser = async (req, res) => {
   try {
-    const { email, password, role, phone } = req.body;
+    const { name, email, password, role, phone } = req.body;
 
-    if (!email || !password || !role || !phone) {
+    if (!name || !email || !password || !role || !phone) {
       return res.status(400).json({
-        message: "All fields are required",
+        message: "name, email, password, role, phone are required",
       });
     }
 
@@ -23,6 +23,7 @@ const createUser = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = await User.create({
+      name,
       email,
       password: hashedPassword,
       role,
@@ -33,22 +34,31 @@ const createUser = async (req, res) => {
 
     res.status(201).json({
       message: "Staff created successfully",
-      user: newUser,
+      user: {
+        _id: newUser._id,
+        name: newUser.name,
+        email: newUser.email,
+        phone: newUser.phone,
+        role: newUser.role,
+        image: newUser.image,
+        status: newUser.status,
+      },
     });
   } catch (error) {
-  console.error("CREATE STAFF ERROR:", error);
-
-  res.status(500).json({
-    message: "Server error",
-    error: error.message
-  });
+    console.error("CREATE STAFF ERROR:", error);
+    res.status(500).json({
+      message: "Server error",
+      error: error.message,
+    });
   }
 };
 
 // ✅ GET ALL STAFF
 const getAllStaff = async (req, res) => {
   try {
-    const staff = await User.find().select("-password").sort({ createdAt: -1 });
+    const staff = await User.find()
+      .select("-password")
+      .sort({ createdAt: -1 });
 
     res.status(200).json({
       count: staff.length,
@@ -83,9 +93,10 @@ const getSingleStaff = async (req, res) => {
 // ✅ UPDATE STAFF
 const updateStaffMember = async (req, res) => {
   try {
-    const { email, role, phone } = req.body;
+    const { name, email, role, phone } = req.body;
 
     const updateData = {
+      name,
       email,
       role,
       phone,
@@ -95,9 +106,11 @@ const updateStaffMember = async (req, res) => {
       updateData.image = req.file.path;
     }
 
-    const user = await User.findByIdAndUpdate(req.params.id, updateData, {
-      new: true,
-    }).select("-password");
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      { new: true }
+    ).select("-password");
 
     if (!user) {
       return res.status(404).json({
@@ -130,7 +143,7 @@ const updateStaffStatus = async (req, res) => {
     const user = await User.findByIdAndUpdate(
       req.params.id,
       { status },
-      { new: true },
+      { new: true }
     ).select("-password");
 
     if (!user) {
@@ -155,6 +168,7 @@ const deleteStaffMember = async (req, res) => {
   try {
     const { id } = req.params;
 
+    // Cannot delete yourself
     if (id === req.user._id.toString()) {
       return res.status(403).json({
         message: "You cannot delete yourself",
@@ -183,7 +197,7 @@ const deleteStaffMember = async (req, res) => {
 const getDashboard = async (req, res) => {
   try {
     res.status(200).json({
-      message: `Hey ${req.user.role}, it's your Admin Dashboard`,
+      message: `Welcome ${req.user.name}, Admin Dashboard`,
     });
   } catch (error) {
     res.status(500).json({

@@ -2,8 +2,8 @@ const express = require("express");
 const connectDB = require("./config/database");
 const adminRouter = require("./routes/admin.routes");
 const authRouter = require("./routes/auth.routes");
-const serviceRouter = require("./routes/service.routes");
-const salesRouter = require("./routes/sales.routes");
+const solarRouter = require("./routes/solar.routes");
+const sprinklerRouter = require("./routes/sprinkler.routes");
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -14,8 +14,8 @@ app.use("/uploads", express.static("uploads"));
 
 app.use("/api/auth", authRouter);
 app.use("/api/admin", adminRouter);
-app.use("/api/sales", salesRouter);
-app.use("/api/service", serviceRouter);
+app.use("/api/solar", solarRouter);
+app.use("/api/sprinkler", sprinklerRouter);
 
 app.get("/", (req, res) => {
   res.send("Solar Plant Management System API");
